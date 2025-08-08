@@ -108,7 +108,8 @@ class KeyValueStore:
         self._value_to_keys.pop()
         for key_name, value_in_layer in top_layer_changes.items():
             if value_in_layer is None:
-                self._data[-1].pop(key_name, None)
+                # Записываем tombstone в родительский слой, чтобы не "пробивалось" базовое значение
+                self._data[-1][key_name] = None
                 for mapped_value in self._value_to_keys[-1]:
                     self._value_to_keys[-1][mapped_value].discard(key_name)
             else:
