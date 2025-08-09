@@ -1,6 +1,7 @@
-from typing import Callable, Dict, List, Any, Optional
+from typing import Callable, Dict, List, Optional
 from utils.logger_config import logger
 from utils.read_command import show_help
+from utils.key_value_store import KeyValueStore
 
 
 class CommandDispatcher:
@@ -8,12 +9,12 @@ class CommandDispatcher:
     Класс для обработки команд key-value хранилища и транзакций.
     """
 
-    def __init__(self, store: Any) -> None:
+    def __init__(self, store: KeyValueStore) -> None:
         """
         Инициализация диспетчера команд.
         :param store: Экземпляр KeyValueStore
         """
-        self.store: Any = store
+        self.store = store
         self.commands: Dict[str, Callable[[List[str]], Optional[bool]]] = {
             'SET': self.cmd_set,
             'GET': self.cmd_get,
@@ -90,6 +91,7 @@ class CommandDispatcher:
         if len(args) != 0:
             raise ValueError('Команда BEGIN не принимает аргументов')
         self.store.begin()
+        print('Транзакция начата')
 
     def cmd_rollback(self, args: List[str]) -> None:
         """
@@ -98,7 +100,10 @@ class CommandDispatcher:
         """
         if len(args) != 0:
             raise ValueError('Команда ROLLBACK не принимает аргументов')
-        self.store.rollback()
+        if self.store.rollback():
+            print('Откат транзакции выполнен')
+        else:
+            print('Не запущено ни одной транзакции!')
 
     def cmd_commit(self, args: List[str]) -> None:
         """
@@ -107,7 +112,10 @@ class CommandDispatcher:
         """
         if len(args) != 0:
             raise ValueError('Команда COMMIT не принимает аргументов')
-        self.store.commit()
+        if self.store.commit():
+            print('Транзакция применена')
+        else:
+            print('Не запущено ни одной транзакции!')
 
     def cmd_end(self, args: List[str]) -> None:
         """

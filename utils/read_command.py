@@ -24,12 +24,10 @@ def read_command(show_help_flag: bool = False) -> Tuple[str, List[str]]:
     logger.info('Ожидание ввода...')
     if show_help_flag:
         show_help()
-
     parts = input().strip().split()
     if not parts:
         logger.debug('Нет ввода или команды.')
         raise ValueError('Нет ввода или команды.')
-
     cmd, *args = parts
     logger.debug(f'Разобрана команда: {cmd.upper()}, аргументы: {args}')
     return cmd.upper(), args
